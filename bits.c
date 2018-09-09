@@ -171,9 +171,10 @@ NOTES:
  *   Rating: 1
  */
 int bitAnd(int x, int y) {
-  return 2;
+	
+	return ~((~x)|(~y));
 }
-/* 
+/*
  * getByte - Extract byte n from word x
  *   Bytes numbered from 0 (LSB) to 3 (MSB)
  *   Examples: getByte(0x12345678,1) = 0x56
@@ -182,7 +183,8 @@ int bitAnd(int x, int y) {
  *   Rating: 2
  */
 int getByte(int x, int n) {
-  return 2;
+	int arb = 0xFF;  	
+	return (x>>(n<<3))&arb;
 }
 /* 
  * logicalShift - shift x to the right by n, using a logical shift
@@ -193,10 +195,10 @@ int getByte(int x, int n) {
  *   Rating: 3 
  */
 int logicalShift(int x, int n) {
-  return 2;
+		  
+	return 2;
 }
-/*
- * bitCount - returns count of number of 1's in word
+ /* bitCount - returns count of number of 1's in word
  *   Examples: bitCount(5) = 2, bitCount(7) = 3
  *   Legal ops: ! ~ & ^ | + << >>
  *   Max ops: 40
@@ -213,7 +215,8 @@ int bitCount(int x) {
  *   Rating: 4 
  */
 int bang(int x) {
-  return 2;
+	
+	return 2;
 }
 /* 
  * tmin - return minimum two's complement integer 
@@ -222,7 +225,9 @@ int bang(int x) {
  *   Rating: 1
  */
 int tmin(void) {
-  return 2;
+	int x = 0x80;
+	
+  	return (x<<24) ;
 }
 /* 
  * fitsBits - return 1 if x can be represented as an 
