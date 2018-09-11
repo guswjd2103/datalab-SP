@@ -1,4 +1,5 @@
-/* 
+/*
+* 
  * CS:APP Data Lab 
  * 
  * <Please put your name and userid here>
@@ -195,8 +196,10 @@ int getByte(int x, int n) {
  *   Rating: 3 
  */
 int logicalShift(int x, int n) {
-		  
-	return 2;
+	int mid = (0xff<<8)|0xff;
+	int final = (mid<<16)|mid;
+	int shift = final<<(32+(~n+1));
+	return (x>>n)&(~shift);	
 }
  /* bitCount - returns count of number of 1's in word
  *   Examples: bitCount(5) = 2, bitCount(7) = 3
@@ -205,7 +208,8 @@ int logicalShift(int x, int n) {
  *   Rating: 4
  */
 int bitCount(int x) {
-  return 2;
+ 
+	return 2;
 }
 /* 
  * bang - Compute !x without using !
