@@ -196,10 +196,8 @@ int getByte(int x, int n) {
  *   Rating: 3 
  */
 int logicalShift(int x, int n) {
-	int mid = (0xff<<8)|0xff;
-	int final = (mid<<16)|mid;
-	int shift = final<<(32+(~n+1));
-	return (x>>n)&(~shift);	
+	int nshift = (((0x01<<31)>>n)<<1);
+	return (x>>n)&(~nshift);	
 }
  /* bitCount - returns count of number of 1's in word
  *   Examples: bitCount(5) = 2, bitCount(7) = 3
@@ -208,7 +206,12 @@ int logicalShift(int x, int n) {
  *   Rating: 4
  */
 int bitCount(int x) {
- 
+ 	int evenlong = (0x33<<8)+(0x33<<16)+(0x33<<24)+0x33;
+	int oddlong = (0x55<<8)+(0x55<<16)+(0x55<<24)+0x55;
+	int evennum = x&evenlong;
+	int oddnum = x&oddlong;
+	int result = (evennum>>1)+oddnum;
+	
 	return 2;
 }
 /* 
@@ -220,7 +223,7 @@ int bitCount(int x) {
  */
 int bang(int x) {
 	
-	return 2;
+	return ((~x&(~(~x+1)))>>31)&0x01;
 }
 /* 
  * tmin - return minimum two's complement integer 
@@ -232,8 +235,7 @@ int tmin(void) {
 	int x = 0x80;
 	
   	return (x<<24) ;
-}
-/* 
+}/* 
  * fitsBits - return 1 if x can be represented as an 
  *  n-bit, two's complement integer.
  *   1 <= n <= 32
@@ -264,7 +266,7 @@ int divpwr2(int x, int n) {
  *   Rating: 2
  */
 int negate(int x) {
-  return 2;
+  return (~x+1);
 }
 /* 
  * isPositive - return 1 if x > 0, return 0 otherwise 
@@ -306,7 +308,8 @@ int ilog2(int x) {
  *   Legal ops: Any integer/unsigned operations incl. ||, &&. also if, while
  *   Max ops: 10
  *   Rating: 2
- */
+ 
+*/
 unsigned float_neg(unsigned uf) {
  return 2;
 }
