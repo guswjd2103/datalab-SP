@@ -245,7 +245,9 @@ int tmin(void) {
  *   Rating: 2
  */
 int fitsBits(int x, int n) {
-  return 2;
+  	int num = 32+~n+1;
+	int xor = (x<<num)>>num;
+	return !(x^xor);
 }
 /* 
  * divpwr2 - Compute x/(2^n), for 0 <= n <= 30
@@ -276,7 +278,8 @@ int negate(int x) {
  *   Rating: 3
  */
 int isPositive(int x) {
-  return 2;
+  	int msb = (x>>31);
+	return (msb)&1;
 }
 /* 
  * isLessOrEqual - if x <= y  then return 1, else return 0 
