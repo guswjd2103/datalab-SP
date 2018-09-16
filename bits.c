@@ -199,7 +199,10 @@ int getByte(int x, int n) {
  */
 int logicalShift(int x, int n) {
 	int nshift = (((0x01<<31)>>n)<<1);
-	return (x>>n)&(~nshift);	
+	return (x>>n)&(~nshift);
+/*we want to get only front 32bit of integer. And if we do (x>>n), integer has n of msb in front of integer. We don't need them, so if we do "&" operation with x>>n, we can get the right result of logical right shift. We can get 11,,10000000 (n of 1) by using shift 0x01<<31 and >>n , <<1.*/
+
+	
 }
  /* bitCount - returns count of number of 1's in word
  *   Examples: bitCount(5) = 2, bitCount(7) = 3
@@ -208,12 +211,6 @@ int logicalShift(int x, int n) {
  *   Rating: 4
  */
 int bitCount(int x) {
- 	int evenlong = (0x33<<8)+(0x33<<16)+(0x33<<24)+0x33;
-	int oddlong = (0x55<<8)+(0x55<<16)+(0x55<<24)+0x55;
-	int evennum = x&evenlong;
-	int oddnum = x&oddlong;
-	int result = (evennum>>1)+oddnum;
-	
 	return 2;
 }
 /* 
@@ -299,11 +296,11 @@ int isPositive(int x) {
  *   Rating: 3
  */
 int isLessOrEqual(int x, int y) {
-  	int sub = x+(~y+1);
+  	int sub = y+(~x+1);
 	int msbx = (x>>31)&0x01;
 	int msby = (y>>31)&0x01;	
+	return (msbx& !msby) | (!(msbx ^ msby) &!((sub>>31)&0x01));	
 	
-	return 2 ;
 }
 /* ilog2 - return floor(log base 2 of x), where x > 0
  *   Example: ilog2(16) = 4
@@ -327,7 +324,8 @@ int ilog2(int x) {
  
 */
 unsigned float_neg(unsigned uf) {
- return 2;
+ 	
+	return 2;
 }
 /* 
  * float_i2f - Return bit-level equivalent of expression (float) x
