@@ -185,7 +185,9 @@ int bitAnd(int x, int y) {
  */
 int getByte(int x, int n) {
 	int arb = 0xFF;  	
-	return (x>>(n<<3))&arb;
+	return (x>>(n<<3))&arb;/* we want to extrac byte n from x, so if we do & operation with number that has 11111111 only n^th byte that is made from using left shift of 0xff, we can get byte n from x.*/
+
+
 }
 /* 
  * logicalShift - shift x to the right by n, using a logical shift
@@ -234,7 +236,9 @@ int bang(int x) {
 int tmin(void) {
 	int x = 0x80;
 	
-  	return (x<<24) ;
+  	return (x<<24) ;/*Tmin is 100...0, so if we do left shift to 10000000 by 24, we can get 1000...0=Tmin.*/
+
+
 }/* 
  * fitsBits - return 1 if x can be represented as an 
  *  n-bit, two's complement integer.
@@ -258,8 +262,12 @@ int fitsBits(int x, int n) {
  *   Rating: 2
  */
 int divpwr2(int x, int n) {
-    return 2;
-}
+    	int inter=(x>>31)&0x01;
+	int mid = (inter<<n)+(x>>31);
+	return (x+mid)>>n;
+}/* if x is positive, we can get the result from x>>k, but if x is negative, we have to calculate like this : (x+1<<n-1)>>n. so we have to make 1<<n-1 to 0 in case of positive. MSB of positive number is 0 and msb of negative number is 1 so we can generalize 1<<n to ((x>>31)&0x01)>>n(because (x>>31)&0x01 means msb of integer. Also, -1 is 1111...1 = (x>>31) in case of negative, and we don't have to add -1 in case of positive so we can add (x>>31) in case of positive. Then we can get the result from (x+1<<n-1)>>n in case of positive.*/
+
+ 
 /* 
  * negate - return -x 
  *   Example: negate(1) = -1.
@@ -268,7 +276,7 @@ int divpwr2(int x, int n) {
  *   Rating: 2
  */
 int negate(int x) {
-  return (~x+1);
+  return (~x+1); /* (~x+1)+x = 0, so -x is equal to ~x+1*/
 }
 /* 
  * isPositive - return 1 if x > 0, return 0 otherwise 
@@ -278,10 +286,12 @@ int negate(int x) {
  *   Rating: 3
  */
 int isPositive(int x) {
-  	int msb = (x>>31);
-	return (msb)&1;
+  	return!(((x>>31)&0x01)|!x); /*(x>>31)&0x01 is msb of int.But in case of zero, msb is 0 but result should be 0, so if we do | operation with !x then we can handle zero like negative, so we can get 1 if we do !. If x is positive, msb will 0 and !x will be 0, so if we do ! operation, we will get 1.*/
+
+
+
 }
-/* 
+/*
  * isLessOrEqual - if x <= y  then return 1, else return 0 
  *   Example: isLessOrEqual(4,5) = 1.
  *   Legal ops: ! ~ & ^ | + << >>
@@ -289,10 +299,13 @@ int isPositive(int x) {
  *   Rating: 3
  */
 int isLessOrEqual(int x, int y) {
-  return 2;
+  	int sub = x+(~y+1);
+	int msbx = (x>>31)&0x01;
+	int msby = (y>>31)&0x01;	
+	
+	return 2 ;
 }
-/*
- * ilog2 - return floor(log base 2 of x), where x > 0
+/* ilog2 - return floor(log base 2 of x), where x > 0
  *   Example: ilog2(16) = 4
  *   Legal ops: ! ~ & ^ | + << >>
  *   Max ops: 90
