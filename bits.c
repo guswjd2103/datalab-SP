@@ -211,7 +211,33 @@ int logicalShift(int x, int n) {
  *   Rating: 4
  */
 int bitCount(int x) {
-	return 2;
+	int second = 0x33+(0x33<<8)+(0x33<<16)+(0x33<<24);/*00110011...*/
+	int first = ~second;/*11001100...*/
+	int oddlong = 0x55+(0x55<<8)+(0x55<<16)+(0x55<<24);/*0101010101...*/
+	int evenlong = ~oddlong;/*101010...*/
+	int fourfirst = 0XF0+(0XF0<<8)+(0XF0<<16)+(0XF0<<24);/*1111000011110000...*/
+	int foursecond = ~fourfirst;/*0000111100001111*/
+	int eightsecond = 0xff+(0xff<<16);/*00000000111111110000000011111111*/
+	int eightfirst = ~eightsecond;/*1111111100000000111111...*/
+	int sixsecond=0xff+(0xff<<8);
+	int sixfirst = ~sixsecond;
+	int even = x&evenlong;
+	int odd = x&oddlong;
+	int result = (even>>1)+odd;
+	even = result&first;
+	odd =result&second;
+	result = (even>>2)+odd;/*2개씩밀어서 더함*/
+	even = result&fourfirst;
+	odd =result &foursecond;
+	result = (even>>4)+odd;/*4개씩 밀어서 더함*/
+	even = result&eightfirst;
+	odd = result&eightsecond;
+	result = (even>>8)+odd;
+	even = result&sixfirst;
+	odd = result&sixsecond;
+	result = (even>>16)+odd;       
+
+	return result;
 }
 /* 
  * bang - Compute !x without using !
@@ -324,8 +350,10 @@ int ilog2(int x) {
  
 */
 unsigned float_neg(unsigned uf) {
- 	
-	return 2;
+ 	int exp = (0xFF<<23);
+	if (((exp&uf)==exp) && ((~((0xff<<24)>>1))&uf))
+		return uf;
+	return uf^(0x01<<31);
 }
 /* 
  * float_i2f - Return bit-level equivalent of expression (float) x
@@ -337,7 +365,8 @@ unsigned float_neg(unsigned uf) {
  *   Rating: 4
  */
 unsigned float_i2f(int x) {
-  return 2;
+  	
+	return 2;
 }
 /* 
  * float_twice - Return bit-level equivalent of expression 2*f for
