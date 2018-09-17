@@ -202,7 +202,6 @@ int logicalShift(int x, int n) {
 	return (x>>n)&(~nshift);
 /*we want to get only front 32bit of integer. And if we do (x>>n), integer has n of msb in front of integer. We don't need them, so if we do "&" operation with x>>n, we can get the right result of logical right shift. We can get 11,,10000000 (n of 1) by using shift 0x01<<31 and >>n , <<1.*/
 
-	
 }
  /* bitCount - returns count of number of 1's in word
  *   Examples: bitCount(5) = 2, bitCount(7) = 3
@@ -211,32 +210,35 @@ int logicalShift(int x, int n) {
  *   Rating: 4
  */
 int bitCount(int x) {
-	int second = 0x33+(0x33<<8)+(0x33<<16)+(0x33<<24);/*00110011...*/
-	int first = ~second;/*11001100...*/
-	int oddlong = 0x55+(0x55<<8)+(0x55<<16)+(0x55<<24);/*0101010101...*/
-	int evenlong = ~oddlong;/*101010...*/
-	int fourfirst = 0XF0+(0XF0<<8)+(0XF0<<16)+(0XF0<<24);/*1111000011110000...*/
-	int foursecond = ~fourfirst;/*0000111100001111*/
-	int eightsecond = 0xff+(0xff<<16);/*00000000111111110000000011111111*/
-	int eightfirst = ~eightsecond;/*1111111100000000111111...*/
-	int sixsecond=0xff+(0xff<<8);
-	int sixfirst = ~sixsecond;
-	int even = x&evenlong;
-	int odd = x&oddlong;
-	int result = (even>>1)+odd;
-	even = result&first;
-	odd =result&second;
-	result = (even>>2)+odd;/*2개씩밀어서 더함*/
-	even = result&fourfirst;
-	odd =result &foursecond;
-	result = (even>>4)+odd;/*4개씩 밀어서 더함*/
-	even = result&eightfirst;
+	int second = 0x33;
+	int oddlong = 0x55;
+	int fourfirst = 0XF;
+	int eightsecond = 0xff+(0xff<<16);/*00000000111111110000*/
+	int sixsecond=0xff+(0xff<<8);/*0*16+1*16*/
+	int even;
+	int odd;
+	int result=x;
+	second=second+(second<<8);
+        second = second+(second<<16);/*001100110011...*/
+        oddlong = oddlong+(oddlong<<8);
+        oddlong= oddlong+(oddlong<<16);/*0101010101010...*/
+        fourfirst = fourfirst+(fourfirst<<8);
+        fourfirst = fourfirst+(fourfirst<<16);/*0000111100001111*/
+	even = (result>>1)&oddlong;
+	odd = result&oddlong;
+	result = even+odd;
+	even = (result>>2)&second;
+	odd = result&second;
+	result = even+odd;
+	even = (result>>4)& fourfirst;
+	odd = result&fourfirst;
+	result = even +odd;
+	even = (result>>8)&eightsecond;
 	odd = result&eightsecond;
-	result = (even>>8)+odd;
-	even = result&sixfirst;
-	odd = result&sixsecond;
-	result = (even>>16)+odd;       
-
+	result = even+odd;
+	even = (result>>16)&sixsecond;
+	odd = result & sixsecond;
+	result = even+odd;
 	return result;
 }
 /* 
