@@ -224,10 +224,10 @@ int bitCount(int x) {
         oddlong= oddlong+(oddlong<<16);/*0101010101010...*/
         fourfirst = fourfirst+(fourfirst<<8);
         fourfirst = fourfirst+(fourfirst<<16);/*0000111100001111*/
-	even = (result>>1)&oddlong;
-	odd = result&oddlong;
-	result = even+odd;
-	even = (result>>2)&second;
+	even = (result>>1)&oddlong;/*extract even number of integer by using operation "&" with 0101010... to result>>1*/ 
+	odd = result&oddlong;/*extract odd number of integer by using operation "&" with 0101010... to result*/
+	result = even+odd;/*we can get the number of 1 in part of each two number(even, odd) ex)if x is 1110 then even will be 101, odd will be 100 then result will be 1001. 10 means the number of front two number(2), 01 means the number of last two number(1).*/
+	even = (result>>2)&second;/*we have to add 10+01, so if we do & operation with 001100011 to result>>2, result then we can get 10, 01 and if we add both of them, we can get the number of 1 in integer. In 32bit integer, we do >> operation 1,2,4,8,16 and & operation with 0101010..., 00110011..., 0000111100001111..., 0000000011111111..., 00000000000000001111111111111111 and use + operation, we can get the result*/
 	odd = result&second;
 	result = even+odd;
 	even = (result>>4)& fourfirst;
@@ -355,7 +355,9 @@ unsigned float_neg(unsigned uf) {
  	int exp = (0xFF<<23);
 	if (((exp&uf)==exp) && ((~((0xff<<24)>>1))&uf))
 		return uf;
-	return uf^(0x01<<31);
+	return uf^(0x01<<31);/* if exp is 11111111 and frac is not 00000000 then that float is considerd as NaNS. 0xff<<23 means 01111111100000...0 , if  exp&uf ==exp, then it means exp is 11111111. (~((0xff<<24)>>1)) means frac numbers and if this is not zero then (((exp&uf)==exp) && ((~((0xff<<24)>>1))&uf)) will be true that means uf is NaNs so return argument uf. If uf is not NaNs, we have to change only sign bit 0->1, 1->0 so we return the value of using ^ operation with 10000..0.*/
+
+
 }
 /* 
  * float_i2f - Return bit-level equivalent of expression (float) x
