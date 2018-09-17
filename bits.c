@@ -384,5 +384,16 @@ unsigned float_i2f(int x) {
  *   Rating: 4
  */
 unsigned float_twice(unsigned uf) {
-  return 2;
+	int sign = uf&(0x01<<31);/* sign bit will be same as msb*/
+	int exp = uf&(0xff<<23);/* exponent will be 1bit to 9 bit, so if we do & operation with 0111111110000...0 then we can get exponent part*/
+	int frac = (~((0xff<<24)>>1))&uf;/*the last 23 bit will be the frac part so if we do & operation with 000...01*23 then we can get frac part*/
+
+	if(exp==(0xff<<23))
+		return uf; /*if uf is NaNs and infinity. Because infinity*2=infinity+infinity, that means NaNs.*/
+	if(uf==(0x00<<24)||uf==(0x01<<31))
+		return uf;/*if we multiply two to zero, the result will be zero.*/
+	if((exp==0) && (frac!=0))
+		return ((frac+frac)|(sign|exp));/* M=0.xxx .Therefore we can just add twice frac. if frac addition occur overflow(more than 11..1(23 bit)) then it will be added to exp bit because of | operation.*/
+
+	return uf+(0x01<<23);/* if uf is (-1)^s *M*2^E, then *2 means (-1)^s*M*2^(E+1). in other words, we have to increase 1 to E(exponent). We can't do like denormalized value because normarlized value has leading 1 implicitly in M(1.xxxx...), so we can't do just addition between frac part but we should increase expoenent 1.*/
 }
