@@ -250,7 +250,9 @@ int bitCount(int x) {
  */
 int bang(int x) {
 	
-	return ((~x&(~(~x+1)))>>31)&0x01;
+	int firstmsb = ((~x)>>31)&0x01;
+	int secondmsb = ((~(~x+1))>>31)&0x01;
+	return (firstmsb&secondmsb);/*we have to notice that 0 and tmin(1000..0) have same msb in case of x and -x, and other numbers have different msb in case of x and -x(= ~x+1). I use this point and try to make different in case of Tmin. In case of 0, both ~x and ~(~x+1) have 1 as msb, but others have different msb in ~x and ~(~x+1). For instance, x=10000...00, msb of ~x is 0, ~(~x+1)=~(1000...0), msb of ~(~x+1) is 0. So if we do & operation, we can get the result that we want. */
 }
 /* 
  * tmin - return minimum two's complement integer 
@@ -276,7 +278,9 @@ int tmin(void) {
 int fitsBits(int x, int n) {
   	int num = 32+~n+1;
 	int xor = (x<<num)>>num;
-	return !(x^xor);
+	return !(x^xor);/*If x=1111111...101(-3), n=-3, the result of (x<<(32-n))>>3 is same with original x, that means it can be represented by 3bit. And if x=5=00000....0101, n=3 then (x<<29)>>3 = 11111.....1101 which is not same with original x, that means x can't be represented by 3 bit.*/
+
+
 }
 /* 
  * divpwr2 - Compute x/(2^n), for 0 <= n <= 30
@@ -324,11 +328,15 @@ int isPositive(int x) {
  *   Rating: 3
  */
 int isLessOrEqual(int x, int y) {
-  	int sub = y+(~x+1);
-	int msbx = (x>>31)&0x01;
-	int msby = (y>>31)&0x01;	
-	return (msbx& !msby) | (!(msbx ^ msby) &!((sub>>31)&0x01));	
-	
+  	int sub = y+(~x+1);/*y-x*/
+	int msbx = (x>>31)&0x01;/*sign of x*/
+	int msby = (y>>31)&0x01;/*sign of y*/
+	int firstcase = (msbx& !msby);/*(msbx& !msby) check x<0 and y>0.*/
+	int secondcase = (!(msbx ^ msby) &!((sub>>31)&0x01));/*sign of x and y are same and sign of (y-x) is 0*/
+	return firstcase | secondcase ;/*If firstcase is true(=1) or secondcasethen is true, return 1  */	
+	/* we can think just check sign of (y-x) and lead to result, but it can't be. Because if x=10000..0, y=0000...01 then x<y. But msb(sign) of  y+(~x+1) is 1 algthough y-x is positive. So we have to think seperately. To be y>=x is true, firstcase is x<0 and y>0. Second case is sign of x and y are same, sign of y-x is 0.*/
+
+			
 }
 /* ilog2 - return floor(log base 2 of x), where x > 0
  *   Example: ilog2(16) = 4
@@ -337,7 +345,31 @@ int isLessOrEqual(int x, int y) {
  *   Rating: 4
  */
 int ilog2(int x) {
-  return 2;
+  	int result = 0;
+	int temp = !!(x>>16);
+	temp=temp<<4;/*make temp to check if x is bigger than 16, if temp = 0 then temp<<4 will be zero and if temp=1 then temp<<4 will be 10000*/
+	result = result+(temp&0x10);/*if temp=0 that means x is smaller than 2^16 because upper 16 bits don't have 1, and if temp=1, it means x is larger than 2^16 because upper 16 bits have 1. In second case, we have to add 16 because x>2^16 -> logx>16, result will be bigger than 16*/
+	x=x>>(temp&0x10);/* if temp=0000...010000, x is shifted by 16 to find first 1 in upper 16 bit and if temp=000..000, x is not shifted.*/
+
+	temp = !!(x>>8);
+	temp = temp<<3;
+	result = result+(temp&0x08);
+	x=x>>(temp&0x08);
+	
+	temp = !!(x>>4);
+        temp = temp<<2;
+        result = result+(temp&0x04);
+        x=x>>(temp&0x04);
+	
+	temp = !!(x>>2);
+        temp = temp<<1;
+        result = result+(temp&0x02);
+        x=x>>(temp&0x02);
+
+	temp = !!(x>>1);
+        result = result+(temp&0x01);
+
+	return result;
 }
 /* 
  * float_neg - Return bit-level equivalent of expression -f for
