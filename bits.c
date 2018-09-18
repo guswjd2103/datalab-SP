@@ -173,7 +173,7 @@ NOTES:
  */
 int bitAnd(int x, int y) {
 	
-	return ~((~x)|(~y));
+	return ~((~x)|(~y));/* for instance, x=6=000...00110, y=5=0000...0101. then ~x is 1111....001, ~y is 1111....1010 and (~x|~y) is 1111,,,,1011, and after do ~ operation, we can get common bit.In other words,(~x)|(~y) lead the integer that don't represented by common 1, others are 1 that are not common. So if we do ~ operation, we can get common bits.*/
 }
 /*
  * getByte - Extract byte n from word x
