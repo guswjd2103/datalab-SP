@@ -278,7 +278,7 @@ int tmin(void) {
 int fitsBits(int x, int n) {
   	int num = 32+~n+1;
 	int xor = (x<<num)>>num;
-	return !(x^xor);/*If x=1111111...101(-3), n=-3, the result of (x<<(32-n))>>3 is same with original x, that means it can be represented by 3bit. And if x=5=00000....0101, n=3 then (x<<29)>>3 = 11111.....1101 which is not same with original x, that means x can't be represented by 3 bit.*/
+	return !(x^xor);/*If x=1111111...101(-3), n=3, the result of (x<<(32-3))>>29 is same with original x, that means it can be represented by 3bit. And if x=5=00000....0101, n=3 then (x<<29)>>29 = 11111.....1101 which is not same with original x, that means x can't be represented by 3 bit.*/
 
 
 }
@@ -401,8 +401,42 @@ unsigned float_neg(unsigned uf) {
  *   Rating: 4
  */
 unsigned float_i2f(int x) {
-  	
-	return 2;
+	int sign =0;
+        unsigned ans=0;
+	int temp=x, abs =0, E=0, exceed=0, originfrac = 0;
+        int G=0,R=0,S=0, shift=0, realfrac=0;
+        sign = x&0x80000000;
+	ans+=sign;
+        if(x==0) return 0;
+        if(x==0x80000000) return 0xcf000000;
+        if(ans){
+                temp=-x;
+		
+        }
+	abs = temp;
+        while(abs/=2){
+                E+=1;
+
+        }/*we can get E which is exponent of 2, f = (-1)^s *M *2^E*/
+        
+	exceed = E-23;
+        originfrac =temp&((1<<E)-1);
+        if(exceed>0){
+                /*check G, R, S to do rounding*/
+                G = originfrac&(1<<exceed);
+                shift = 1<<(exceed-1);
+                R = originfrac& shift;
+                S = originfrac&(shift-1);
+                realfrac = (originfrac>>exceed)+(R &&(S||G));
+                ans =ans+(realfrac);
+        }
+        else{
+                ans=ans+(originfrac<<(23-E));
+        }
+
+        return (ans+((E+127)<<23));
+
+		  
 }
 /* 
  * float_twice - Return bit-level equivalent of expression 2*f for
