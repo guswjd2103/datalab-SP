@@ -401,47 +401,29 @@ unsigned float_neg(unsigned uf) {
  *   Rating: 4
  */
 unsigned float_i2f(int x) {
-	int sign =0;
-        unsigned ans=0;
-	int abs =0, E=0, exceed=0, originfrac = 0;
-        int realfrac=0;
-        sign = x&0x80000000;
-	ans+=sign;
-        if(x==0) return 0;
-        if(x==0x80000000) return 0xcf000000;
-        if(ans){
-                x=-x;
-        }
-	abs = x;
-        while(abs/=2){
-                E+=1;
-		
-        }/*we can get E which is exponent of 2, f = (-1)^s *M *2^E*/
-        ans+=((E+127)<<23);
-	exceed = E-23;
-        originfrac =x&((1<<E)-1);
-        if(exceed>0){
-                /*check G, R, S to do rounding*/
-                realfrac = (originfrac>>exceed);
-                if(originfrac&0x00000100)/*R=1이면*/{
-			if(originfrac&0x00000200){
-				realfrac+=1;/*R=1,G=1*/
-			}
-			else{/*G=0인경우*/
-				if(originfrac&0x000000ff)/*R=1S=1*/{
-					realfrac+=1;
-				}
-			}
-		}
-		ans =ans+(realfrac);
-        }
-        else{
-                ans=ans+(originfrac<<(-exceed));
-        }
+	int mask = 0x80<<24;/* mask =tmin*/
+	int sign = x&mask;/* to check x is negative or positive*/
+	unsigned ans = ans+sign;/*we have to return the value of unsigned type, so declare ans*/
+	int frac;
+	int exp = 158;/*E=exp-127,max of E is 31 so max exp = 158*/
+	int twentythree = 23;
+	if(!x) return 0;/*if x is 0 then return 0*/
+	if(x==mask){
+		return mask|(9<<(twentythree+4))|(14<<twentythree);/*if x is Tmin, we have to return 0xcf000000;*/
+	}
+	if(ans){
+		x=~x+1;
+	}/* if x is negative, we have to make x to -x*/
+	while(!(x&mask)){
+		x=x<<1;
+		exp-=1;
+	}/*if we divide x by 2, we can do E++, inversely, if we do <<1 operation we have to substract 1 to E.*/
+	frac = (x&(~mask))>>8;/*we can get the bit except for sign bit by x&(~mask), and it is 31bit. In single precision floating point values, frac charges 23bit, so we have to do right shift by 8*/
+	if(x&0x80 && (x&0x7f||frac&1))
+		frac=frac+1;/* when we do right shift 8, we have to handle the case that is longer than 23bit. x&0x80 lead the Round bit, frac&1 lead the Ground bit and x&0x7f check the sticky bit if there is 1 in over bit. If R=1 and G=1 then we have to round to even, R=1,G=0, S=1 we have to round up*/ 
 
-        return ans;
+        return ans+(exp<<twentythree)+frac;
 
-		  
 }
 /* 
  * float_twice - Return bit-level equivalent of expression 2*f for
