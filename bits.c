@@ -236,7 +236,7 @@ int bitCount(int x) {
 	even = (result>>8)&eightsecond;
 	odd = result&eightsecond;
 	result = even+odd;
-	even = (result>>16)&sixsecond;
+	even = (result>>16)&sixsecond;/* Like above, do same algorithm repeatedly by increasing shift number 1,2,4,8,16. After that, we can get the result of number of 1 in integer.*/
 	odd = result & sixsecond;
 	result = even+odd;
 	return result;
@@ -366,7 +366,7 @@ int ilog2(int x) {
         result = result+(temp&0x02);
         x=x>>(temp&0x02);
 
-	temp = !!(x>>1);
+	temp = !!(x>>1);/* do same algorithm that i explain. So we can get the result!*/
         result = result+(temp&0x01);
 
 	return result;
