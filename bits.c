@@ -403,38 +403,43 @@ unsigned float_neg(unsigned uf) {
 unsigned float_i2f(int x) {
 	int sign =0;
         unsigned ans=0;
-	int temp=x, abs =0, E=0, exceed=0, originfrac = 0;
-        int G=0,R=0,S=0, shift=0, realfrac=0;
+	int abs =0, E=0, exceed=0, originfrac = 0;
+        int realfrac=0;
         sign = x&0x80000000;
 	ans+=sign;
         if(x==0) return 0;
         if(x==0x80000000) return 0xcf000000;
         if(ans){
-                temp=-x;
-		
+                x=-x;
         }
-	abs = temp;
+	abs = x;
         while(abs/=2){
                 E+=1;
-
+		
         }/*we can get E which is exponent of 2, f = (-1)^s *M *2^E*/
-        
+        ans+=((E+127)<<23);
 	exceed = E-23;
-        originfrac =temp&((1<<E)-1);
+        originfrac =x&((1<<E)-1);
         if(exceed>0){
                 /*check G, R, S to do rounding*/
-                G = originfrac&(1<<exceed);
-                shift = 1<<(exceed-1);
-                R = originfrac& shift;
-                S = originfrac&(shift-1);
-                realfrac = (originfrac>>exceed)+(R &&(S||G));
-                ans =ans+(realfrac);
+                realfrac = (originfrac>>exceed);
+                if(originfrac&0x00000100)/*R=1이면*/{
+			if(originfrac&0x00000200){
+				realfrac+=1;/*R=1,G=1*/
+			}
+			else{/*G=0인경우*/
+				if(originfrac&0x000000ff)/*R=1S=1*/{
+					realfrac+=1;
+				}
+			}
+		}
+		ans =ans+(realfrac);
         }
         else{
-                ans=ans+(originfrac<<(23-E));
+                ans=ans+(originfrac<<(-exceed));
         }
 
-        return (ans+((E+127)<<23));
+        return ans;
 
 		  
 }
